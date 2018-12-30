@@ -1,0 +1,3 @@
+#!/bin/sh
+# Run slapd as the ldap user
+exec /usr/bin/slapd -s0 -d 0x4105 -u ldap -g ldap -h ldap:///
