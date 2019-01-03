@@ -2,6 +2,8 @@ FROM baseimage:0.11 AS build
 
 ARG OPENLDAP_URL_MD5=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.md5
 ARG OPENLDAP_URL_TGZ=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.tgz
+ENV OPENLDAP_CONF_FILE=/etc/openldap/openldap-docker/conf.ldif
+ENV OPENLDAP_SECRETS_DIR=/run/secrets
 
 # Install OpenLDAP dependencies 
 RUN set -x && \
@@ -59,8 +61,10 @@ COPY --from=build /usr /usr
 COPY --from=build /etc/openldap /etc/openldap
 # Copy the slapd runit service file from the build context
 COPY service/openldap /etc/service/openldap
-# Copy over configuration files from build context- any files in context will overwrite defaults
-COPY openldap /etc/openldap
+# Copy startup scripts from build context
+COPY my_init.d /etc/my_init.d
+# Copy configuration files from build context
+COPY openldap-docker /etc/openldap/openldap-docker
 
 # Final cleanups
 RUN set -x && \
@@ -71,7 +75,9 @@ RUN set -x && \
     useradd -r -g ldap -s /usr/sbin/nologin -d /usr/local/etc/openldap -c "OpenLDAP server" ldap && \
     chown -vR root:ldap /etc/openldap && \
 # Change permissions on configuration and service files
-    chmod -vR 650 /etc/openldap && \
-    chmod -v +x /etc/service/openldap/run
+    chmod -vR 640 /etc/openldap && \
+    chmod -v +x /etc/openldap/openldap-docker/load_secrets.py && \
+    chmod -v +x /etc/service/openldap/run && \
+    chmod -v +x /etc/my_init.d/confldap.sh
 
 ENTRYPOINT ["/sbin/my_init"]
