@@ -54,10 +54,10 @@ RUN set -x && \
 # Multi-State: Move build OpenLDAP binaries to a fresh image
 FROM baseimage:0.11
 
+# Nothing in /var that we need to copy over at this point, just copy over /usr and /etc/openldap
 COPY --from=build /usr /usr
 COPY --from=build /etc/openldap /etc/openldap
-# Nothing in /var that we need to copy over at this point
-# Copy the slapd service file from the build context
+# Copy the slapd runit service file from the build context
 COPY service/openldap /etc/service/openldap
 # Copy over configuration files from build context- any files in context will overwrite defaults
 COPY openldap /etc/openldap
