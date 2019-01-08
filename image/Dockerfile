@@ -1,9 +1,12 @@
-FROM baseimage:0.11 AS build
+FROM baseimage:0.11
 
 ARG OPENLDAP_URL_MD5=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.md5
 ARG OPENLDAP_URL_TGZ=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.tgz
-ENV OPENLDAP_CONF_FILE=/etc/openldap/openldap-docker/conf.ldif
-ENV OPENLDAP_SECRETS_DIR=/run/secrets
+
+# Add path to dynamically linked libraries
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+# Location of slapd ldif config file to create cn=config database
+ENV SLAPD_CONFIG_LDIF=/usr/local/etc/openldap/slapd.ldif
 
 # Install OpenLDAP dependencies 
 RUN set -x && \
@@ -17,11 +20,11 @@ RUN set -x && \
         libtool \
         make
 
-# Download and extract OpenLDAP to /bd_build, which was created in baseimage
+# Download and extract OpenLDAP to /bd_build
 WORKDIR /bd_build
 RUN set -x && \
-    curl --output openldap.tgz $OPENLDAP_URL_TGZ && \
-    curl --output openldap.md5 $OPENLDAP_URL_MD5 && \
+    wget -v --output-document openldap.tgz $OPENLDAP_URL_TGZ && \
+    wget -v --output-document openldap.md5 $OPENLDAP_URL_MD5 && \
 # md5sum requires a specific format in the md5 file we give it
     echo "$(grep -oe '[a-f0-9]\{32\}' openldap.md5)  openldap.tgz" > openldap.md5 && \
     md5sum --check openldap.md5 && \
@@ -31,7 +34,6 @@ RUN set -x && \
     mv openldap* openldap
 
 # Configure OpenLDAP, build and install
-# Use mdb backend, with ipv6, tls, syslog and sasl support
 WORKDIR /bd_build/openldap
 RUN set -x && \
     ./configure --disable-dependency-tracking \ 
@@ -42,10 +44,6 @@ RUN set -x && \
         --enable-hdb=no \
         --enable-ipv6=yes \
         --enable-syslog=yes \
-        --libexecdir=/usr/bin \
-        --localstatedir=/var \
-        --prefix=/usr \
-        --sysconfdir=/etc \
         --with-cyrus-sasl=yes \
         --with-threads=yes \
         --with-tls=openssl && \
@@ -53,31 +51,30 @@ RUN set -x && \
     make && \
     make install
 
-# Multi-State: Move build OpenLDAP binaries to a fresh image
-FROM baseimage:0.11
-
-# Nothing in /var that we need to copy over at this point, just copy over /usr and /etc/openldap
-COPY --from=build /usr /usr
-COPY --from=build /etc/openldap /etc/openldap
 # Copy the slapd runit service file from the build context
 COPY service/openldap /etc/service/openldap
-# Copy startup scripts from build context
-COPY my_init.d /etc/my_init.d
-# Copy configuration files from build context
-COPY openldap-docker /etc/openldap/openldap-docker
+# Copy the slapd config init service from the build context
+COPY my_init.d/config_slapd.sh /etc/my_init.d/20_config_slapd.sh
 
 # Final cleanups
 RUN set -x && \
-# Delete all man pages, as man isn't installed in this image anyway (saves a lot of space)
-    find /usr/share/man -regextype sed -regex ".*/\(ldap.*\|slap.*\)" | xargs rm -v && \
+# Delete all man pages, as man isn't installed in this image anyway (saves some space)
+    find /usr/local/share/man -regextype sed -regex ".*/\(ldap.*\|slap.*\)" | xargs rm -v && \
+# Remove bd_build directory, as we don't need it anymore
+    rm -rv /bd_build && \
 # Create ldap user and group which slapd will run as
     groupadd -r ldap && \
     useradd -r -g ldap -s /usr/sbin/nologin -d /usr/local/etc/openldap -c "OpenLDAP server" ldap && \
-    chown -vR root:ldap /etc/openldap && \
-# Change permissions on configuration and service files
-    chmod -vR 640 /etc/openldap && \
-    chmod -v +x /etc/openldap/openldap-docker/load_secrets.py && \
+# Remove unecessary configuration files
+    rm -v /usr/local/etc/openldap/*.conf && \
+# Change permssions on configuration files
+    chown -vR root:ldap /usr/local/etc/openldap && \
+    chmod -vR 650 /usr/local/etc/openldap && \
+# Set permissinos on service and init files
     chmod -v +x /etc/service/openldap/run && \
-    chmod -v +x /etc/my_init.d/confldap.sh
+    chmod -v +x /etc/my_init.d/20_config_slapd.sh
 
+
+WORKDIR /usr/local/etc/openldap
 ENTRYPOINT ["/sbin/my_init"]
+
