@@ -8,7 +8,7 @@ ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Location of slapd ldif config file to create cn=config database
 ENV SLAPD_CONFIG_LDIF=/usr/local/etc/openldap/slapd.ldif
 
-# Install OpenLDAP dependencies 
+# Install OpenLDAP dependencies
 RUN set -x && \
     install_clean \
         g++ \
@@ -36,7 +36,7 @@ RUN set -x && \
 # Configure OpenLDAP, build and install
 WORKDIR /bd_build/openldap
 RUN set -x && \
-    ./configure --disable-dependency-tracking \ 
+    ./configure --disable-dependency-tracking \
         --disable-static \
         --enable-bdb=no \
         --enable-dynamic \
