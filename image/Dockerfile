@@ -65,8 +65,6 @@ RUN set -x && \
 # Create ldap user and group which slapd will run as
     groupadd -r ldap && \
     useradd -r -g ldap -s /usr/sbin/nologin -d /usr/local/etc/openldap -c "OpenLDAP server" ldap && \
-# Remove unecessary configuration files
-    rm -v /usr/local/etc/openldap/*.conf && \
 # Change permssions on configuration files
     chown -vR root:ldap /usr/local/etc/openldap && \
     chmod -vR 650 /usr/local/etc/openldap && \
