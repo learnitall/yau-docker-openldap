@@ -1,10 +1,13 @@
 #!/bin/sh
+
+# Fail the script if any of these commands fail ("-e" option)
 set -x -e
-# Set proper permissions on slapd config
+
+# Set proper permissions on slapd config file
 chown -v ldap:ldap "${SLAPD_CONFIG_LDIF}"
 chmod -v 640 "${SLAPD_CONFIG_LDIF}"
 
-# Set proper permissions on all directories used for databases
+# Set proper permissions on all directories used for databases specified in the config
 grep "olcDbDirectory:" "${SLAPD_CONFIG_LDIF}" | awk -F ":" '{print $2}' | while IFS= read -r db; do
     if [ -n "$db" ]; then
         mkdir -p $db
@@ -13,16 +16,16 @@ grep "olcDbDirectory:" "${SLAPD_CONFIG_LDIF}" | awk -F ":" '{print $2}' | while 
     fi 
 done
 
-
-# Remove existing configuration, if needed, then create empty slapd.d
+# Remove existing configuration, if needed
 if [ -d "/usr/local/etc/openldap/slapd.d" ]; then
     rm -rfv /usr/local/etc/openldap/slapd.d
 fi
+
+# Create empty config directory
 mkdir /usr/local/etc/openldap/slapd.d
 chown -v ldap:ldap /usr/local/etc/openldap/slapd.d
 
-
-# Create slapd configuration from the slapd config ldif
+# Create slapd configuration from the slapd config ldif, using slapdadd utility
 /sbin/setuser ldap /usr/local/sbin/slapadd -n0 -v -F /usr/local/etc/openldap/slapd.d -l "${SLAPD_CONFIG_LDIF}"
 
 # Set proper permissions from slapd.pid and slapd.args files if needed, as since we are running 
@@ -46,5 +49,5 @@ done
 chown -v ldap:ldap $pidFile $argsFile
 chmod -v 640 $pidFile $argsFile
 
-# Test configuration
+# Test configuration to make sure we are all good to go
 /sbin/setuser ldap /usr/local/sbin/slaptest -n0 -v -F /usr/local/etc/openldap/slapd.d
