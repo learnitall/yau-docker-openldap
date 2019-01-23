@@ -1,4 +1,4 @@
-FROM baseimage:0.11
+FROM baseimage:0.11 as build
 
 ARG OPENLDAP_URL_MD5=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.md5
 ARG OPENLDAP_URL_TGZ=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.tgz
@@ -51,6 +51,12 @@ RUN set -x && \
     make && \
     make install
 
+
+# Start from a fresh image
+FROM baseimage:0.11
+
+# Copy over built openldap files
+COPY --from=build /usr/local /usr/local
 # Copy the slapd runit service file from the build context
 COPY service/openldap /etc/service/openldap
 # Copy the slapd config init service from the build context
