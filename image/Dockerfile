@@ -3,11 +3,6 @@ FROM baseimage:0.11 as build
 ARG OPENLDAP_URL_MD5=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.md5
 ARG OPENLDAP_URL_TGZ=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.47.tgz
 
-# Add path to dynamically linked libraries
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
-# Location of slapd ldif config file to create cn=config database
-ENV SLAPD_CONFIG_LDIF=/usr/local/etc/openldap/slapd.ldif
-
 # Install OpenLDAP dependencies
 RUN set -x && \
     install_clean \
@@ -55,12 +50,17 @@ RUN set -x && \
 # Start from a fresh image
 FROM baseimage:0.11
 
+# Add path to dynamically linked libraries
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+# Location of slapd ldif config file to create cn=config database
+ENV SLAPD_CONFIG_LDIF=/usr/local/etc/openldap/slapd.ldif
+
 # Copy over built openldap files
 COPY --from=build /usr/local /usr/local
 # Copy the slapd runit service file from the build context
 COPY service/openldap /etc/service/openldap
 # Copy the slapd config init service from the build context
-COPY my_init.d/config_slapd.sh /etc/my_init.d/20_config_slapd.sh
+COPY my_init.d /etc/my_init.d
 
 # Final cleanups
 RUN set -x && \
@@ -76,7 +76,7 @@ RUN set -x && \
     chmod -vR 650 /usr/local/etc/openldap && \
 # Set permissinos on service and init files
     chmod -v +x /etc/service/openldap/run && \
-    chmod -v +x /etc/my_init.d/20_config_slapd.sh
+    chmod -vR +x /etc/my_init.d
 
 
 WORKDIR /usr/local/etc/openldap
