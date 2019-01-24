@@ -28,6 +28,9 @@ chown -v ldap:ldap /usr/local/etc/openldap/slapd.d
 # Create slapd configuration from the slapd config ldif, using slapdadd utility
 /sbin/setuser ldap /usr/local/sbin/slapadd -n0 -v -F /usr/local/etc/openldap/slapd.d -l "${SLAPD_CONFIG_LDIF}"
 
+# Rebuild indices
+/sbin/setuser ldap /usr/local/sbin/slapindex -v -F /usr/local/etc/openldap/slapd.d -l "${SLAPD_CONFIG_LDIF}"
+
 # Set proper permissions from slapd.pid and slapd.args files if needed, as since we are running 
 # slapd as a non-root user they need to be created beforehand
 # Look for pid and args file definitions in the given slapd ldif config, setting defaults if not given
