@@ -53,7 +53,7 @@ FROM baseimage:0.11
 # Add path to dynamically linked libraries
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Location of slapd ldif config file to create cn=config database
-ENV SLAPD_CONFIG_LDIF=/usr/local/etc/openldap/slapd.ldif
+ENV SLAPD_CONFIG_LDIF="/usr/local/etc/openldap/slapd.ldif"
 
 # Copy over built openldap files
 COPY --from=build /usr/local /usr/local
