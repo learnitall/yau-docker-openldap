@@ -50,13 +50,16 @@ RUN set -x && \
 # Start from a fresh image
 FROM baseimage:0.11
 
-# Add path to dynamically linked libraries
+# Add path to ldap dynamically linked libraries in
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Location of slapd ldif config file to create cn=config database
 ENV SLAPD_CONFIG_LDIF="/usr/local/etc/openldap/slapd.ldif"
 
 # Copy over built openldap files
 COPY --from=build /usr/local /usr/local
+# Copy over dynamic libraries
+COPY --from=build /usr/include /usr/include
+COPY --from=build /usr/lib /usr/lib
 # Copy the slapd runit service file from the build context
 COPY service/openldap /etc/service/openldap
 # Copy the slapd config init service from the build context
