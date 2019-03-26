@@ -13,7 +13,7 @@ grep "olcDbDirectory:" "${SLAPD_CONFIG_LDIF}" | awk -F ":" '{print $2}' | while 
         mkdir -p $db
         chown -vR ldap:ldap $db
         chmod -vR 777 $db
-    fi 
+    fi
 done
 
 # Remove existing configuration, if needed
@@ -28,10 +28,7 @@ chown -v ldap:ldap /usr/local/etc/openldap/slapd.d
 # Create slapd configuration from the slapd config ldif, using slapdadd utility
 /sbin/setuser ldap /usr/local/sbin/slapadd -n0 -v -F /usr/local/etc/openldap/slapd.d -l "${SLAPD_CONFIG_LDIF}"
 
-# Rebuild indices
-/sbin/setuser ldap /usr/local/sbin/slapindex -v -F /usr/local/etc/openldap/slapd.d -l "${SLAPD_CONFIG_LDIF}"
-
-# Set proper permissions from slapd.pid and slapd.args files if needed, as since we are running 
+# Set proper permissions from slapd.pid and slapd.args files if needed, as since we are running
 # slapd as a non-root user they need to be created beforehand
 # Look for pid and args file definitions in the given slapd ldif config, setting defaults if not given
 pidFileLdif="$(grep "olcPidFile:" "${SLAPD_CONFIG_LDIF}" | awk -F ":" '{print $2}')"
@@ -42,7 +39,7 @@ argsFile=${argsFileLdif:="/var/slapd.args"}
 # Create the pid file and all parent directories
 for f in $pidFile $argsFile; do
     if [ ! -e "$f" ]; then
-        mkdir -p $f 
+        mkdir -p $f
         rm -r $f
         touch $f
     fi
