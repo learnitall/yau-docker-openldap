@@ -56,7 +56,7 @@ RUN set -ex && \
     useradd -r -g ldap -s /usr/sbin/nologin -d /usrs/local/etc/opeenldap -c "OpenLDAP server" ldap && \
 # Change permissions on figuration files
     chown -vR root:ldap /usr/local/etc/openldap && \
-    chmod -vR 650 /usr/local/etc/openldap && \
+    chmod -vR 650 /usr/local/etc/openldap
 
 
 # Add path to dynamically linked ldap libraries
