@@ -5,7 +5,7 @@ ARG OPENLDAP_URL_TGZ=https://www.openldap.org/software/download/OpenLDAP/openlda
 
 # Install OpenLDAP dependencies need for build
 RUN set -ex && \
-    yum install \
+    yum -y install \
       g++ \
       groff \
       groff-base \
@@ -14,7 +14,7 @@ RUN set -ex && \
       libssl-dev \
       libtool \
       make && \
-    yum clean all
+    yum -y clean all
 
 # Download and extract OpenLDAP to /build
 RUN set -ex && \
