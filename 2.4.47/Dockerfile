@@ -58,7 +58,6 @@ RUN set -ex && \
     chown -vR root:ldap /usr/local/etc/openldap && \
     chmod -vR 650 /usr/local/etc/openldap
 
-
 # Add path to dynamically linked ldap libraries
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Location of slapd ldif config file to create cn=config database on entry
