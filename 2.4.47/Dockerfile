@@ -20,8 +20,8 @@ RUN set -ex && \
 RUN set -ex && \
     mkdir /build && \
     cd /build && \
-    wget -v --output-document openldap.tgz $OPENLDAP_URL_TGZ && \
-    wget -v --output-document openldap.md5 $OPENLDAP_URL_MD5 && \
+    curl -v --output openldap.tgz $OPENLDAP_URL_TGZ && \
+    curl -v --output openldap.md5 $OPENLDAP_URL_MD5 && \
 # md5sum requires a specific format in the md5 file we give it
     echo "$(grep -oe '[a-f0-9]\{32\}' openldap.md5) openldap.tgz" > openldap.md5 && \
     md5sum --check openldap.md5 && \
