@@ -59,6 +59,8 @@ RUN set -ex && \
 
 # Add path to dynamically linked ldap libraries
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+# Extend Path variable to contain location to slapd
+ENV PATH="$PATH:/usr/local/libexec"
 # Location of slapd ldif config file to create cn=config database on entry
 ENV SLAPD_CONFIG_LDIF="/usr/local/etc/openldap/slapd.ldif"
 
