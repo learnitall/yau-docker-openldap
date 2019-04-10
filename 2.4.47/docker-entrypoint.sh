@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 # if command starts with an option, then prepend slapd
 if [ "${1:0:1}" == "-" ]; then
