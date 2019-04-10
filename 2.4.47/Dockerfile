@@ -8,12 +8,26 @@ RUN set -ex && \
     yum -y install \
       cyrus-sasl-devel \
       gcc \
+      gnupg \
       groff \
       groff-base \
       libltdl-dev \
       make \
       openssl-devel && \
     yum -y clean all
+
+# Install Gosu for easy step down from root
+ENV GOSU_VERSION 1.11
+RUN set -ex && \
+    curl -vL --output /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" && \
+    curl -vL --output /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" && \
+    export GNUPGHOME="$(mktemp -d)" && \
+    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
+    gpg --batch --verify /usr/local/bin/gosu.asc && \
+    rm -rf $GNUPGHOME /usr/local/bin/gosu.asc && \
+    chmod +x /usr/local/bin/gosu && \
+    gosu --version && \
+    gosu nobody true
 
 # Download and extract OpenLDAP to /build
 RUN set -ex && \
@@ -47,6 +61,10 @@ RUN set -ex && \
     make && \
     make install
 
+# Entrypoint
+COPY docker-entrypoint.sh /usr/local/bin
+ENTRYPOINT ["docker-entrypoint.sh"]
+
 # Final cleanups
 RUN set -ex && \
     rm -rv /build && \
@@ -55,7 +73,9 @@ RUN set -ex && \
     useradd -r -g ldap -s /usr/sbin/nologin -d /usrs/local/etc/openldap -c "OpenLDAP server" ldap && \
 # Change permissions on figuration files
     chown -vR root:ldap /usr/local/etc/openldap && \
-    chmod -vR 650 /usr/local/etc/openldap
+    chmod -vR 650 /usr/local/etc/openldap && \
+# Make entrypoint executable
+    chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Add path to dynamically linked ldap libraries
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
@@ -66,10 +86,6 @@ ENV SLAPD_CONFIG_LDIF="/usr/local/etc/openldap/slapd.ldif"
 
 # Volume where data is stored
 VOLUME /usr/local/var/openldap-data
-
-# Entrypoint
-COPY docker-entrypoint.sh /usr/local/bin
-ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Ports for slapd on ldap:/// and ldaps:///
 EXPOSE 389 636
