@@ -52,7 +52,7 @@ RUN set -ex && \
     rm -rv /build && \
 # Create ldap user and group
     groupadd -r ldap && \
-    useradd -r -g ldap -s /usr/sbin/nologin -d /usrs/local/etc/opeenldap -c "OpenLDAP server" ldap && \
+    useradd -r -g ldap -s /usr/sbin/nologin -d /usrs/local/etc/openldap -c "OpenLDAP server" ldap && \
 # Change permissions on figuration files
     chown -vR root:ldap /usr/local/etc/openldap && \
     chmod -vR 650 /usr/local/etc/openldap
