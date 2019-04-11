@@ -1,5 +1,0 @@
-#!/bin/sh
-# Run slapd as the ldap user
-set -x
-exec /usr/local/libexec/slapd -F /usr/local/etc/openldap/slapd.d -u ldap -g ldap -d 0x4000 -s 0x4000 -l LOCAL4 -h "ldapi:/// ldap:///"
-
