@@ -5,7 +5,7 @@ doing so through Docker doesn't seem to be the most popular option out there.
 But hey, whether you're running in a development environment or in production,
 this image was designed with the following principles in mind:
 
-* **Easy of Use**: Should be able to go from zero to 100 with relatively small
+* **Ease of Use**: Should be able to go from zero to 100 with relatively small
   amounts of reading and typing. This image adheres to the best practices layed
   out in the [OpenLDAP administration guide](https://www.openldap.org/doc/admin24/).
 * **No Middle-Man**: Using the image to deploy OpenLDAP shouldn't get in the
