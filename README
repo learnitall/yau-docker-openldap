@@ -1,9 +1,0 @@
-# openldap-docker: Containerized OpenLDAP
-
-This image is in part of a goal to create a containerized, highly available
-authentication and authorization solution (based on OpenLDAP and Kerberos) for
-use in a development environment. 
-
-## LICENSE (MIT)
-
-(See included license file)
